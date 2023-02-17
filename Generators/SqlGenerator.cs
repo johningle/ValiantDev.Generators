@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Generators
 {
@@ -18,8 +18,8 @@ namespace Generators
             // find all additional files that end with .sql
             var sqlFiles = initContext.AdditionalTextsProvider
                 .Where(static file => file.Path.EndsWith(".sql"))
-                .Select((text, cancellationToken) => (Path.GetFileNameWithoutExtension(text.Path), Regex.Escape(text.GetText(cancellationToken)!.ToString())))
-                .Select((nameAndContent, cancellationToken) => $"\tpublic const string {nameAndContent.Item1} = \"{nameAndContent.Item2}\";").Collect();
+                .Select((text, cancellationToken) => (Path.GetFileNameWithoutExtension(text.Path), SymbolDisplay.FormatLiteral(text.GetText(cancellationToken)!.ToString(), true)))
+                .Select((nameAndContent, cancellationToken) => $"\tpublic const string {nameAndContent.Item1} = {nameAndContent.Item2};").Collect();
             
             initContext.RegisterSourceOutput(sqlFiles, (spc, fieldDeclaration) =>
             {
