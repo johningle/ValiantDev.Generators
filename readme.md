@@ -7,7 +7,7 @@ A developer should only need to to complete the following steps to use the event
 2. Add the following section to their .csproj file:
    ```
    <ItemGroup>
-       <AdditionalFiles Include="*.sql" />
+       <AdditionalFiles Include="**\*.sql" />
    </ItemGroup>
    ```
 3. Add a file to their project ending in .sql (intended to contain SQL code, may be generalized and configurable in a later release).
@@ -24,7 +24,7 @@ To avoid burdening users with further requirements than those listed in the Usag
 
 The generated static `SqlFiles` class is placed in the project's root namespace.
 
-## Mapping SQL File Path & Name to SqlFiles (TBD)
+## Mapping SQL File Path & Name to SqlFiles (Done)
 
 To avoid restricting users' options for organizing their SQL files, both the file path and name are used to determine the const string location within `SqlFiles`.
 Static inner classes are generated for each subdirectory in the file path, thereby providing a navigation chain reflecting the file system organization.
