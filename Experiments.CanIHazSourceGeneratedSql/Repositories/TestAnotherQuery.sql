@@ -1,3 +1,3 @@
 ﻿select *
 from other_table
-where its_column = 9
+where its_column = 42

@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace Generators;
 
@@ -56,13 +57,13 @@ public class SqlGenerator : ISourceGenerator
             .Select((additionalText) => new TextDetail
             {
                 Path = additionalText.Path,
-                Content = SymbolDisplay.FormatLiteral(additionalText.GetText()!.ToString(), true)
+                Content = SymbolDisplay.FormatLiteral(additionalText.GetText()!.ToString(), false)
             });
         
         foreach (var item in sqlFiles)
             AddSqlMember(item.Path, item.Content);
         
-        execContext.AddSource("SqlFiles.generated.cs", _tree.ToString()); 
+        execContext.AddSource("SqlFiles.generated.cs", Regex.Unescape(_tree.ToString())); 
     }
     
     public void Initialize(GeneratorInitializationContext initContext) { }
@@ -81,8 +82,29 @@ public class SqlGenerator : ISourceGenerator
                     parent = AddClassDeclaration(parent!, component);
             }
 
-            AddSqlMemberAsChildNode(parent!, sqlFilePath, content);
+            var memberName = Path.GetFileNameWithoutExtension(sqlFilePath);
+            
+            if (HasSqlMemberAsChildNode(parent!, memberName))
+                parent = RemoveSqlMemberChildNode(parent!, memberName, content);
+            
+            AddSqlMemberAsChildNode(parent!, memberName, content);
         }
+    }
+
+    private ClassDeclarationSyntax RemoveSqlMemberChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
+    {
+        var existing = parentNode.DescendantNodes(_ => true)
+            .OfType<VariableDeclaratorSyntax>()
+            .First(decl => decl.Identifier.ToString().Equals(memberName, StringComparison.InvariantCultureIgnoreCase));
+        
+        return parentNode.RemoveNode(existing, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+
+    private bool HasSqlMemberAsChildNode(ClassDeclarationSyntax parent, string memberName)
+    {
+        return parent.DescendantNodes(_ => true)
+            .OfType<VariableDeclaratorSyntax>()
+            .Any(decl => decl.Identifier.ToString().Equals(memberName, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private bool TryGetClassDeclaration(string identifier, out ClassDeclarationSyntax? node)
@@ -131,10 +153,8 @@ public class SqlGenerator : ISourceGenerator
         return result;
     }
 
-    private void AddSqlMemberAsChildNode(ClassDeclarationSyntax parentNode, string sqlFilePath, string content)
+    private void AddSqlMemberAsChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
     {
-        var memberName = Path.GetFileNameWithoutExtension(sqlFilePath);
-
         // add a const string member for the sql file name and content
         var newClassDeclaration = parentNode.AddMembers(
             SyntaxFactory.FieldDeclaration(
