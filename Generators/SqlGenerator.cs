@@ -13,7 +13,7 @@ namespace Generators;
 /// </summary>
 /// <example>var content = SqlFiles.NameOfSqlFile</example>
 [Generator(LanguageNames.CSharp)]
-public class SqlGenerator : ISourceGenerator
+public class SqlGenerator : IIncrementalGenerator
 {
     private SyntaxTree _tree;
     private string _projectRootPath = string.Empty;
@@ -45,28 +45,34 @@ public class SqlGenerator : ISourceGenerator
                                                 SyntaxFactory.Token(SyntaxKind.PartialKeyword)))))))
                 .NormalizeWhitespace());
     }
-
-    public void Execute(GeneratorExecutionContext execContext)
+    
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        execContext.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir);
-        _projectRootPath = Path.GetDirectoryName(projectDir);
+        var projectPath = context.AnalyzerConfigOptionsProvider.Select((provider, _) =>
+            provider.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir) ?
+                Path.GetDirectoryName(projectDir) : string.Empty);
         
-        // find all additional files that end with .sql
-        var sqlFiles = execContext.AdditionalFiles
+        var sqlFiles = context.AdditionalTextsProvider
             .Where(static file => file.Path.EndsWith(".sql"))
-            .Select((additionalText) => new TextDetail
+            .Select((additionalText, _) => new TextDetail
             {
                 Path = additionalText.Path,
                 Content = SymbolDisplay.FormatLiteral(additionalText.GetText()!.ToString(), false)
             });
-        
-        foreach (var item in sqlFiles)
-            AddSqlMember(item.Path, item.Content);
-        
-        execContext.AddSource("SqlFiles.generated.cs", Regex.Unescape(_tree.ToString())); 
+
+        var sqlCollection = sqlFiles.Collect();
+        var combination = sqlCollection.Combine(projectPath);
+
+        context.RegisterSourceOutput(combination, (sourceProductionContext, tuple) =>
+        {
+            _projectRootPath = tuple.Right!;
+            
+            foreach (var sql in tuple.Left)
+                AddSqlMember(sql.Path, sql.Content);
+            
+            sourceProductionContext.AddSource("SqlFiles.generated.cs", Regex.Unescape(_tree.ToString()));
+        });
     }
-    
-    public void Initialize(GeneratorInitializationContext initContext) { }
 
     private void AddSqlMember(string sqlFilePath, string content)
     {
