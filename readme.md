@@ -3,15 +3,15 @@
 I want this to be as simple as possible to use successfully.
 A developer should only need to to complete the following steps to use the eventual NuGet package:
 
-1. Add a reference to the NuGet package from the project where they want to use the source generator.
+1. Add a reference to the NuGet package from the project where they want to include and use the `.sql` files.
 2. Add the following section to their .csproj file:
    ```
    <ItemGroup>
        <AdditionalFiles Include="**\*.sql" />
    </ItemGroup>
    ```
-3. Add a file to their project ending in .sql (intended to contain SQL code, may be generalized and configurable in a later release).
-4. Use the static class `SqlFiles` to access the contents of their SQL files as strings in their code: 
+3. Add a file to their project ending in `.sql`.
+4. Use the static class `SqlFiles` to access the contents of their `.sql` files as strings in their code: 
    ```
    var sqlString = SqlFiles.SomeQuery;
    ```
