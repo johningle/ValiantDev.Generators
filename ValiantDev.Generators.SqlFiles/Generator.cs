@@ -13,12 +13,12 @@ namespace ValiantDev.Generators.SqlFiles;
 /// </summary>
 /// <example>var content = SqlFiles.NameOfSqlFile</example>
 [Generator(LanguageNames.CSharp)]
-public class SqlGenerator : IIncrementalGenerator
+public class Generator : IIncrementalGenerator
 {
     private SyntaxTree _tree;
     private string _projectRootPath = string.Empty;
     
-    public SqlGenerator()
+    public Generator()
     {
         // build an empty SqlFiles class syntax tree
         _tree = SyntaxFactory.SyntaxTree(
