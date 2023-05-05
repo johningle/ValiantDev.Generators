@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-namespace Generators;
+namespace ValiantDev.Generators.SqlFiles;
 
 /// <summary>
 ///     Finds all files ending with .sql in the project.

@@ -1,8 +1,5 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiments.CanIHazSourceGeneratedSql", "Experiments.CanIHazSourceGeneratedSql\Experiments.CanIHazSourceGeneratedSql.csproj", "{B46D0606-54DF-461B-AFFA-374BA1BBB416}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generators", "Generators\Generators.csproj", "{B7D64C44-4978-45B2-830F-56D0A36E43A9}"
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValiantDev.Generators.SqlFiles", "ValiantDev.Generators.SqlFiles\ValiantDev.Generators.SqlFiles.csproj", "{B7D64C44-4978-45B2-830F-56D0A36E43A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
