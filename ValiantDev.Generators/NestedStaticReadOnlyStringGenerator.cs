@@ -40,8 +40,7 @@ internal class NestedStaticReadOnlyStringGenerator
                                             SyntaxFactory.TokenList(
                                                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),
                                                 SyntaxFactory.Token(SyntaxKind.StaticKeyword),
-                                                SyntaxFactory.Token(SyntaxKind.PartialKeyword)))))))
-                .NormalizeWhitespace());
+                                                SyntaxFactory.Token(SyntaxKind.PartialKeyword))))))));
     }
 
     public void Execute(IncrementalGeneratorInitializationContext context)
@@ -50,33 +49,33 @@ internal class NestedStaticReadOnlyStringGenerator
             provider.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir) ?
                 Path.GetDirectoryName(projectDir) : string.Empty);
 
-        var sqlFiles = context.AdditionalTextsProvider
+        var files = context.AdditionalTextsProvider
             .Where(file => file.Path.EndsWith(_originFileExtension))
             .Select((additionalText, _) => new TextDetail
             {
                 Path = additionalText.Path,
-                Content = SymbolDisplay.FormatLiteral(additionalText.GetText()!.ToString(), false)
+                Content = additionalText.GetText()!.ToString()
             });
 
-        var sqlCollection = sqlFiles.Collect();
-        var combination = sqlCollection.Combine(projectPath);
+        var collection = files.Collect();
+        var combination = collection.Combine(projectPath);
 
         context.RegisterSourceOutput(combination, (sourceProductionContext, tuple) =>
         {
             _projectRootPath = tuple.Right!;
 
-            foreach (var sql in tuple.Left)
-                AddSqlMember(sql.Path, sql.Content);
+            foreach (var textDetail in tuple.Left)
+                AddStringMember(textDetail.Path, textDetail.Content);
 
-            sourceProductionContext.AddSource($"{_accessorClassName}.generated.cs", Regex.Unescape(_tree.ToString()));
+            sourceProductionContext.AddSource($"{_accessorClassName}.generated.cs", _tree.ToString());
         });
     }
 
-    private void AddSqlMember(string sqlFilePath, string content)
+    private void AddStringMember(string filePath, string content)
     {
-        if (TryGetClassDeclaration("SqlFiles", out var parent))
+        if (TryGetClassDeclaration(_accessorClassName, out var parent))
         {
-            var pathComponents = GetLocalPathComponents(sqlFilePath);
+            var pathComponents = GetLocalPathComponents(filePath);
 
             foreach (var component in pathComponents)
             {
@@ -86,16 +85,16 @@ internal class NestedStaticReadOnlyStringGenerator
                     parent = AddClassDeclaration(parent!, component);
             }
 
-            var memberName = Path.GetFileNameWithoutExtension(sqlFilePath);
+            var memberName = Path.GetFileNameWithoutExtension(filePath);
 
-            if (HasSqlMemberAsChildNode(parent!, memberName))
-                parent = RemoveSqlMemberChildNode(parent!, memberName, content);
+            if (HasStringMemberAsChildNode(parent!, memberName))
+                parent = RemoveStringMemberChildNode(parent!, memberName, content);
 
-            AddSqlMemberAsChildNode(parent!, memberName, content);
+            AddStringMemberAsChildNode(parent!, memberName, content);
         }
     }
 
-    private ClassDeclarationSyntax RemoveSqlMemberChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
+    private ClassDeclarationSyntax RemoveStringMemberChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
     {
         var existing = parentNode.DescendantNodes(_ => true)
             .OfType<VariableDeclaratorSyntax>()
@@ -104,7 +103,7 @@ internal class NestedStaticReadOnlyStringGenerator
         return parentNode.RemoveNode(existing, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
-    private bool HasSqlMemberAsChildNode(ClassDeclarationSyntax parent, string memberName)
+    private bool HasStringMemberAsChildNode(ClassDeclarationSyntax parent, string memberName)
     {
         return parent.DescendantNodes(_ => true)
             .OfType<VariableDeclaratorSyntax>()
@@ -157,7 +156,7 @@ internal class NestedStaticReadOnlyStringGenerator
         return result;
     }
 
-    private void AddSqlMemberAsChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
+    private void AddStringMemberAsChildNode(ClassDeclarationSyntax parentNode, string memberName, string content)
     {
         // add a const string member for the sql file name and content
         var newClassDeclaration = parentNode.AddMembers(
@@ -186,8 +185,9 @@ internal class NestedStaticReadOnlyStringGenerator
     private void MutateTree(ClassDeclarationSyntax oldClassDeclaration, ClassDeclarationSyntax newClassDeclaration)
     {
         _tree = SyntaxFactory.SyntaxTree(
-            _tree.GetRoot().ReplaceNode(oldClassDeclaration, newClassDeclaration)
-                .NormalizeWhitespace());
+            _tree.GetRoot()
+            .ReplaceNode(oldClassDeclaration, newClassDeclaration)
+            .NormalizeWhitespace());
     }
 
     private class TextDetail

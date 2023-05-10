@@ -21,8 +21,6 @@
         <ImplicitUsings>true</ImplicitUsings>
         <LangVersion>Latest</LangVersion>
         <IsRoslynComponent>true</IsRoslynComponent>
-        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-        <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup>

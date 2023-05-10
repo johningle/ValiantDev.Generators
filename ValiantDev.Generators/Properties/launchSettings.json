@@ -2,7 +2,7 @@
   "profiles": {
     "Debug": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\ValiantDev.Generators.SqlFiles\\ValiantDev.Generators.SqlFiles.csproj"
+      "targetProject": "..\\ValiantDev.Generators.Tests.Unit\\ValiantDev.Generators.Tests.Unit.csproj"
     }
   }
 }
