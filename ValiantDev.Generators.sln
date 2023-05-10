@@ -1,5 +1,7 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValiantDev.Generators.SqlFiles", "ValiantDev.Generators.SqlFiles\ValiantDev.Generators.SqlFiles.csproj", "{B7D64C44-4978-45B2-830F-56D0A36E43A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValiantDev.Generators", "ValiantDev.Generators\ValiantDev.Generators.csproj", "{B7D64C44-4978-45B2-830F-56D0A36E43A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValiantDev.Generators.Tests.Unit", "ValiantDev.Generators.Tests.Unit\ValiantDev.Generators.Tests.Unit.csproj", "{D1FE59F1-CCFF-41CF-8D29-57B95AD5679E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,5 +17,9 @@ Global
 		{B7D64C44-4978-45B2-830F-56D0A36E43A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7D64C44-4978-45B2-830F-56D0A36E43A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7D64C44-4978-45B2-830F-56D0A36E43A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1FE59F1-CCFF-41CF-8D29-57B95AD5679E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1FE59F1-CCFF-41CF-8D29-57B95AD5679E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1FE59F1-CCFF-41CF-8D29-57B95AD5679E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1FE59F1-CCFF-41CF-8D29-57B95AD5679E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

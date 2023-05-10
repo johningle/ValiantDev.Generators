@@ -1,6 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageId>ValiantDev.Generators</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>John Ingle</Authors>
+        <Company>Valiant.dev</Company>
+        <Description>
+            Makes .sql file contents available as constant strings in your C# code.
+            Useful for keeping SQL string literals where they belong.
+        </Description>
+        <Copyright>Copyright John Ingle, all rights reserved.</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>sql;data access;source generator;incremental generator;incremental source generator</PackageTags>
+    </PropertyGroup>
+    
+    <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <Nullable>enable</Nullable>
@@ -16,7 +30,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive;</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
     </ItemGroup>
 
     <ItemGroup>

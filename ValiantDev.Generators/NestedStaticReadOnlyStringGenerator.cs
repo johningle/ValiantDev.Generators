@@ -4,31 +4,29 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
-namespace ValiantDev.Generators.SqlFiles;
+namespace ValiantDev.Generators;
 
-/// <summary>
-///     Finds all files ending with .sql in the project.
-///     Generates a public static partial class named SqlFiles with const static string fields.
-///     Each field has the normalized name of a single .sql file and contains its contents.
-/// </summary>
-/// <example>var content = SqlFiles.NameOfSqlFile</example>
-[Generator(LanguageNames.CSharp)]
-public class Generator : IIncrementalGenerator
+internal class NestedStaticReadOnlyStringGenerator
 {
     private SyntaxTree _tree;
     private string _projectRootPath = string.Empty;
-    
-    public Generator()
+    private string _accessorClassName = string.Empty;
+    private string _originFileExtension = string.Empty;
+
+    public NestedStaticReadOnlyStringGenerator(string accessorClassName, string originFileExtension)
     {
-        // build an empty SqlFiles class syntax tree
+        _accessorClassName = accessorClassName;
+        _originFileExtension = originFileExtension;
+
+        // start with an empty, static class syntax tree
         _tree = SyntaxFactory.SyntaxTree(
             SyntaxFactory.CompilationUnit()
                 .WithMembers(
                     SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
                         SyntaxFactory.FileScopedNamespaceDeclaration(
                                 SyntaxFactory.QualifiedName(
-                                    SyntaxFactory.IdentifierName("Experiments"),
-                                    SyntaxFactory.IdentifierName("CanIHazSourceGeneratedSql")))
+                                    SyntaxFactory.IdentifierName("ValiantDev"),
+                                    SyntaxFactory.IdentifierName("Generators")))
                             .WithNamespaceKeyword(
                                 SyntaxFactory.Token(
                                     SyntaxFactory.TriviaList(
@@ -37,7 +35,7 @@ public class Generator : IIncrementalGenerator
                                     SyntaxFactory.TriviaList()))
                             .WithMembers(
                                 SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                                    SyntaxFactory.ClassDeclaration("SqlFiles")
+                                    SyntaxFactory.ClassDeclaration(_accessorClassName)
                                         .WithModifiers(
                                             SyntaxFactory.TokenList(
                                                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),
@@ -45,15 +43,15 @@ public class Generator : IIncrementalGenerator
                                                 SyntaxFactory.Token(SyntaxKind.PartialKeyword)))))))
                 .NormalizeWhitespace());
     }
-    
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+
+    public void Execute(IncrementalGeneratorInitializationContext context)
     {
         var projectPath = context.AnalyzerConfigOptionsProvider.Select((provider, _) =>
             provider.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir) ?
                 Path.GetDirectoryName(projectDir) : string.Empty);
-        
+
         var sqlFiles = context.AdditionalTextsProvider
-            .Where(static file => file.Path.EndsWith(".sql"))
+            .Where(file => file.Path.EndsWith(_originFileExtension))
             .Select((additionalText, _) => new TextDetail
             {
                 Path = additionalText.Path,
@@ -66,11 +64,11 @@ public class Generator : IIncrementalGenerator
         context.RegisterSourceOutput(combination, (sourceProductionContext, tuple) =>
         {
             _projectRootPath = tuple.Right!;
-            
+
             foreach (var sql in tuple.Left)
                 AddSqlMember(sql.Path, sql.Content);
-            
-            sourceProductionContext.AddSource("SqlFiles.generated.cs", Regex.Unescape(_tree.ToString()));
+
+            sourceProductionContext.AddSource($"{_accessorClassName}.generated.cs", Regex.Unescape(_tree.ToString()));
         });
     }
 
@@ -89,10 +87,10 @@ public class Generator : IIncrementalGenerator
             }
 
             var memberName = Path.GetFileNameWithoutExtension(sqlFilePath);
-            
+
             if (HasSqlMemberAsChildNode(parent!, memberName))
                 parent = RemoveSqlMemberChildNode(parent!, memberName, content);
-            
+
             AddSqlMemberAsChildNode(parent!, memberName, content);
         }
     }
@@ -102,7 +100,7 @@ public class Generator : IIncrementalGenerator
         var existing = parentNode.DescendantNodes(_ => true)
             .OfType<VariableDeclaratorSyntax>()
             .First(decl => decl.Identifier.ToString().Equals(memberName, StringComparison.InvariantCultureIgnoreCase));
-        
+
         return parentNode.RemoveNode(existing, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
@@ -179,7 +177,8 @@ public class Generator : IIncrementalGenerator
                 .WithModifiers(
                     SyntaxFactory.TokenList(
                         SyntaxFactory.Token(SyntaxKind.PublicKeyword),
-                        SyntaxFactory.Token(SyntaxKind.ConstKeyword))));
+                        SyntaxFactory.Token(SyntaxKind.StaticKeyword),
+                        SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword))));
 
         MutateTree(parentNode, newClassDeclaration);
     }
