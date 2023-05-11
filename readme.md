@@ -20,10 +20,6 @@ A developer should only need to to complete the following steps to use the event
 
 To avoid burdening users with further requirements than those listed in the Usage section, the following conventions are used.
 
-## SqlFiles Namespace (Done)
-
-The generated static `SqlFiles` class is placed in the project's root namespace.
-
 ## Mapping SQL File Path & Name to SqlFiles (Done)
 
 To avoid restricting users' options for organizing their SQL files, both the file path and name are used to determine the const string location within `SqlFiles`.
