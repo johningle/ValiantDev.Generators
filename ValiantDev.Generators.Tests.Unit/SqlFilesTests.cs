@@ -35,4 +35,11 @@ FROM OtherTable ot
 JOIN SomeCTE sc on ot.SomeId = sc.id";
         Assert.Equal(expected, SqlFiles.Subdirectory.Deep.Deeper.DeeperStill.Fathoms);
     }
+
+    [Fact]
+    public void New_members_can_be_added_to_SqlFiles_partial_class()
+    {
+        var expected = @"Server=db.somewhere.example.com;Initial Catalog=the_db";
+        Assert.Equal(expected, SqlFiles.ConnectionString);
+    }
 }
